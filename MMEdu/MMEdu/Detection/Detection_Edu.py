@@ -183,9 +183,11 @@ class MMDetection:
         )
         file = open(os.path.join(self.save_fold ,str(t)+".log.json"), 'r') 
         log = []
-        import ast 
+        import json
+        from json.decoder import JSONDecodeError
         for i in file.readlines():
-            d = ast.literal_eval(i.rstrip('\n'))
+            clean_line = i.rstrip('\n').strip()
+            d = json.loads(clean_line,parse_constant=lambda x:float('nan') if x== 'NaN' else x)
             log.append(d)
         return log
     
@@ -546,6 +548,7 @@ def pytorch2onnx(model,
     from functools import partial
     from mmcv import Config, DictAction
     import onnx
+    model.cpu().eval()
     input_config = {
         'input_shape': input_shape,
         'input_path': input_img,
